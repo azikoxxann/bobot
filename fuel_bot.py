@@ -39,12 +39,6 @@ class Trip(Base):
 Base.metadata.create_all(engine)
 Session = sessionmaker(bind=engine)
 
-def add_cancel_button():
-    markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-    cancel_button = telebot.types.KeyboardButton("Отменить")
-    markup.add(cancel_button)
-    return markup
-
 @bot.message_handler(commands=['start'])
 def start(message):
     try:
@@ -55,11 +49,18 @@ def start(message):
         if user_settings:
             show_main_menu(message)
         else:
-            bot.send_message(message.chat.id, "Похоже, что вы первый раз используете бот. Пожалуйста, введите базовый расход топлива (л/100 км).", reply_markup=add_cancel_button())
+            bot.send_message(message.chat.id, "Похоже, что вы первый раз используете бот. Пожалуйста, введите базовый расход топлива (л/100 км).")
+            add_cancel_button(message)
             bot.register_next_step_handler(message, get_base_fuel_consumption)
     except Exception as e:
         logging.error(f"Error in start command: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
+
+def add_cancel_button(message):
+    markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+    cancel_button = telebot.types.KeyboardButton("Отменить")
+    markup.add(cancel_button)
+    bot.send_message(message.chat.id, "Вы можете отменить действие в любой момент, нажав кнопку Отменить.", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "Отменить")
 def cancel_action(message):
@@ -72,10 +73,12 @@ def get_base_fuel_consumption(message):
         return
     try:
         base_fuel_consumption = float(message.text)
-        bot.send_message(message.chat.id, "Теперь введите дополнительный расход топлива на тонну груза (л/100 км).", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "Теперь введите дополнительный расход топлива на тонну груза (л/100 км).")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: save_user_settings(msg, base_fuel_consumption))
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, get_base_fuel_consumption)
     except Exception as e:
         logging.error(f"Error in get_base_fuel_consumption: {e}", exc_info=True)
@@ -99,7 +102,8 @@ def save_user_settings(message, base_fuel_consumption):
         bot.send_message(message.chat.id, "Настройки сохранены.")
         show_main_menu(message)
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: save_user_settings(msg, base_fuel_consumption))
     except Exception as e:
         logging.error(f"Error in save_user_settings: {e}", exc_info=True)
@@ -118,7 +122,8 @@ def show_main_menu(message):
 def handle_menu(message):
     try:
         if message.text == "Новая запись":
-            bot.send_message(message.chat.id, "Введи показание спидометра при выезде (км).", reply_markup=add_cancel_button())
+            bot.send_message(message.chat.id, "Введи показание спидометра при выезде (км).")
+            add_cancel_button(message)
             bot.register_next_step_handler(message, get_start_km)
         elif message.text == "Просмотреть записи":
             show_trips(message)
@@ -136,10 +141,12 @@ def get_start_km(message):
         return
     try:
         start_km = float(message.text)
-        bot.send_message(message.chat.id, "Теперь введи показание спидометра при приезде (км).", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "Теперь введи показание спидометра при приезде (км).")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: get_end_km(msg, start_km))
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, get_start_km)
     except Exception as e:
         logging.error(f"Error in get_start_km: {e}", exc_info=True)
@@ -152,13 +159,16 @@ def get_end_km(message, start_km):
     try:
         end_km = float(message.text)
         if end_km < start_km:
-            bot.send_message(message.chat.id, "❌ Ошибка! Приезд не может быть меньше выезда.", reply_markup=add_cancel_button())
+            bot.send_message(message.chat.id, "❌ Ошибка! Приезд не может быть меньше выезда.")
+            add_cancel_button(message)
             bot.register_next_step_handler(message, get_start_km)
             return
-        bot.send_message(message.chat.id, "Теперь введи массу груза (кг).", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "Теперь введи массу груза (кг).")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: calculate_fuel(msg, start_km, end_km))
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: get_end_km(msg, start_km))
     except Exception as e:
         logging.error(f"Error in get_end_km: {e}", exc_info=True)
@@ -203,7 +213,8 @@ def calculate_fuel(message, start_km, end_km):
                                           f"Примерный расход топлива: {total_fuel:.2f} литров.\n"
                                           f"Данные сохранены.")
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: calculate_fuel(msg, start_km, end_km))
     except Exception as e:
         logging.error(f"Error in calculate_fuel: {e}", exc_info=True)
@@ -252,7 +263,8 @@ def update_settings(message):
         if user_settings:
             bot.send_message(message.chat.id, f"Ваш текущий базовый расход топлива: {user_settings.base_fuel_consumption} л/100 км\n"
                                               f"Ваш текущий дополнительный расход топлива на тонну груза: {user_settings.extra_fuel_per_ton} л/100 км\n"
-                                              f"Введите новый базовый расход топлива (л/100 км):", reply_markup=add_cancel_button())
+                                              f"Введите новый базовый расход топлива (л/100 км):")
+            add_cancel_button(message)
             bot.register_next_step_handler(message, get_new_base_fuel_consumption)
         else:
             bot.send_message(message.chat.id, "Произошла ошибка при получении настроек пользователя.")
@@ -266,10 +278,12 @@ def get_new_base_fuel_consumption(message):
         return
     try:
         base_fuel_consumption = float(message.text)
-        bot.send_message(message.chat.id, "Теперь введите новый дополнительный расход топлива на тонну груза (л/100 км).", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "Теперь введите новый дополнительный расход топлива на тонну груза (л/100 км).")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: save_new_user_settings(msg, base_fuel_consumption))
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, get_new_base_fuel_consumption)
     except Exception as e:
         logging.error(f"Error in get_new_base_fuel_consumption: {e}", exc_info=True)
@@ -290,11 +304,11 @@ def save_new_user_settings(message, base_fuel_consumption):
         bot.send_message(message.chat.id, "Настройки обновлены.")
         show_main_menu(message)
     except ValueError:
-        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.", reply_markup=add_cancel_button())
+        bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
+        add_cancel_button(message)
         bot.register_next_step_handler(message, lambda msg: save_new_user_settings(msg, base_fuel_consumption))
     except Exception as e:
         logging.error(f"Error in save_new_user_settings: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
 
-if __name__ == "__main__":
-    bot.polling(none_stop=True)
+bot.polling(none_stop=True)
