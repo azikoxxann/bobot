@@ -212,6 +212,7 @@ def calculate_fuel(message, start_km, end_km):
                                           f"Груз: {cargo_weight_kg / 1000:.2f} тонн\n"
                                           f"Примерный расход топлива: {total_fuel:.2f} литров.\n"
                                           f"Данные сохранены.")
+        show_main_menu(message)
     except ValueError:
         bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
         add_cancel_button(message)
@@ -236,6 +237,7 @@ def show_trips(message):
             bot.send_message(message.chat.id, response)
         else:
             bot.send_message(message.chat.id, "Нет записанных поездок.")
+        show_main_menu(message)
     except Exception as e:
         logging.error(f"Error in show_trips: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
@@ -251,6 +253,7 @@ def delete_trips(message):
         else:
             bot.send_message(message.chat.id, "У вас нет записей для удаления.")
         session.close()
+        show_main_menu(message)
     except Exception as e:
         logging.error(f"Error in delete_trips: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
