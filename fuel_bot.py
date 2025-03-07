@@ -16,7 +16,6 @@ load_dotenv()
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 bot = telebot.TeleBot(TOKEN)
 
-# Создаём фейковый веб-сервер
 app = Flask(__name__)
 
 @app.route('/')
@@ -28,6 +27,12 @@ def run_bot():
 
 if __name__ == "__main__":
     from threading import Thread
+
+    # 🔹 Запускаем бота в отдельном потоке
+    Thread(target=run_bot).start()
+
+    # 🔹 Запускаем Flask-сервер (Render требует порт)
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
