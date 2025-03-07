@@ -2,3 +2,4 @@ python-telegram-bot
 SQLAlchemy
 python-dotenv
 telebot
+Flask
