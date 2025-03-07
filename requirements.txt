@@ -2,4 +2,6 @@ python-telegram-bot
 SQLAlchemy
 python-dotenv
 telebot
-Flask
+pyTelegramBotAPI
+flask
+gunicorn
