@@ -21,20 +21,13 @@ app = Flask(__name__)
 
 @app.route('/')
 def home():
-    return "Бот работает!"
+    return "Бот работает! 🚛"
 
-# Запускаем бота
 def run_bot():
-    bot.polling(none_stop=True)
+    bot.infinity_polling()
 
 if __name__ == "__main__":
     from threading import Thread
-
-    # Запускаем Flask-сервер в отдельном потоке
-    Thread(target=lambda: app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))).start()
-
-    # Запускаем самого бота
-    run_bot()
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -346,9 +339,8 @@ def save_new_user_settings(message, base_fuel_consumption):
         logging.error(f"Error in save_new_user_settings: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
 
-# Запускаем Flask и бота в отдельных потоках
-if __name__ == "__main__":
-    flask_thread = threading.Thread(target=run_flask)
-    flask_thread.start()
+# Запускаем бота в отдельном потоке
+    Thread(target=run_bot).start()
 
-    bot.polling(none_stop=True)
+    # Запускаем Gunicorn/Flask
+    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
