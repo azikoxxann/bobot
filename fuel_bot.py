@@ -5,6 +5,17 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Date, BigI
 from sqlalchemy.orm import sessionmaker, declarative_base
 import logging
 from datetime import datetime
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route('/')
+def home():
+    return "Бот работает!"
+
+if __name__ == "__main__":
+    port = int(os.environ.get("PORT", 5000))
+    app.run(host="0.0.0.0", port=port)
 
 load_dotenv()
 
