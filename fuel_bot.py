@@ -7,6 +7,7 @@ import logging
 from datetime import datetime
 from flask import Flask
 import threading
+import time
 
 # Загружаем переменные окружения
 load_dotenv()
@@ -29,6 +30,13 @@ bot = telebot.TeleBot(TOKEN)
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
+
+while True:
+    try:
+        bot.send_message(YOUR_CHAT_ID, "Проверка связи 🤖")
+        time.sleep(600)  # Каждые 10 минут
+    except Exception as e:
+        print(f"Ошибка: {e}")
 
 # Настройки базы данных
 engine = create_engine('sqlite:///trips.db')
