@@ -12,21 +12,29 @@ import time
 # Загружаем переменные окружения
 load_dotenv()
 
-# Инициализация Flask
+# Инициализация бота
+TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+bot = telebot.TeleBot(TOKEN)
+
+# Создаём фейковый веб-сервер
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "Бот работает!"
 
-# Функция для запуска Flask в отдельном потоке
-def run_flask():
-    port = int(os.environ.get("PORT", 5000))
-    app.run(host="0.0.0.0", port=port)
+# Запускаем бота
+def run_bot():
+    bot.polling(none_stop=True)
 
-# Инициализация бота
-TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-bot = telebot.TeleBot(TOKEN)
+if __name__ == "__main__":
+    from threading import Thread
+
+    # Запускаем Flask-сервер в отдельном потоке
+    Thread(target=lambda: app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))).start()
+
+    # Запускаем самого бота
+    run_bot()
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
