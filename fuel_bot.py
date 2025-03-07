@@ -33,8 +33,8 @@ logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
 
 while True:
     try:
-        bot.send_message(@FinejasFCbot, "Проверка связи 🤖")
-        time.sleep(600)  # Каждые 10 минут
+        bot.send_message(7092776397, "Проверка связи 🤖")
+        time.sleep(45)  # Каждые 45 Секунд
     except Exception as e:
         print(f"Ошибка: {e}")
 
