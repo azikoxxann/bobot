@@ -6,26 +6,31 @@ from sqlalchemy.orm import sessionmaker, declarative_base
 import logging
 from datetime import datetime
 from flask import Flask
+import threading
 
+# Загружаем переменные окружения
+load_dotenv()
+
+# Инициализация Flask
 app = Flask(__name__)
 
 @app.route('/')
 def home():
     return "Бот работает!"
 
-if __name__ == "__main__":
+# Функция для запуска Flask в отдельном потоке
+def run_flask():
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
 
-load_dotenv()
-
+# Инициализация бота
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
 bot = telebot.TeleBot(TOKEN)
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
+# Настройки базы данных
 engine = create_engine('sqlite:///trips.db')
 Base = declarative_base()
 
@@ -325,4 +330,9 @@ def save_new_user_settings(message, base_fuel_consumption):
         logging.error(f"Error in save_new_user_settings: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
 
-bot.polling(none_stop=True)
+# Запускаем Flask и бота в отдельных потоках
+if __name__ == "__main__":
+    flask_thread = threading.Thread(target=run_flask)
+    flask_thread.start()
+
+    bot.polling(none_stop=True)
