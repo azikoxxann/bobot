@@ -13,6 +13,7 @@ from fastapi import FastAPI
 load_dotenv()
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+requests.get(f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-1")
 CHAT_ID = 1087235453  # Ваш Telegram ID
 bot = telebot.TeleBot(TOKEN)
 
