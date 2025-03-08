@@ -352,10 +352,11 @@ def run_fastapi():
 
 threading.Thread(target=run_fastapi, daemon=True).start()
 
-# Удаляем Webhook (если был)
+# Полностью удаляем Webhook
 bot.remove_webhook()
+requests.get(f"https://api.telegram.org/bot{TOKEN}/deleteWebhook")
 
-# Очистка зависших обновлений
+# Очищаем зависшие обновления
 requests.get(f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-1")
 
 # Ждём 5 секунд перед запуском
