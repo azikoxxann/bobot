@@ -351,5 +351,7 @@ def run_fastapi():
 
 threading.Thread(target=run_fastapi, daemon=True).start()
 
+bot.remove_webhook()
+
 # Запускаем бота (polling)
 bot.polling(none_stop=True)
