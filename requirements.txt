@@ -6,3 +6,4 @@ pyTelegramBotAPI
 flask
 gunicorn
 uvicorn
+fastapi
