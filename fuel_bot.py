@@ -5,46 +5,16 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Date, BigI
 from sqlalchemy.orm import sessionmaker, declarative_base
 import logging
 from datetime import datetime
-from flask import Flask
-import threading
-import time
 
-# Загружаем переменные окружения
 load_dotenv()
 
-# Инициализация бота
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
+
 bot = telebot.TeleBot(TOKEN)
-
-app = Flask(__name__)
-
-@app.route('/')
-def home():
-    return "Бот работает! 🚛"
-
-def run_bot():
-    bot.infinity_polling()
-
-if __name__ == "__main__":
-    from threading import Thread
-
-    # 🔹 Запускаем бота в отдельном потоке
-    Thread(target=run_bot).start()
-
-    # 🔹 Запускаем Flask-сервер (Render требует порт)
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
 
-while True:
-    try:
-        bot.send_message(1087235453, "Проверка связи 🤖")
-        time.sleep(45)  # Каждые 45 Секунд
-    except Exception as e:
-        print(f"Ошибка: {e}")
-
-# Настройки базы данных
 engine = create_engine('sqlite:///trips.db')
 Base = declarative_base()
 
@@ -90,7 +60,7 @@ def add_cancel_button(message):
     markup = telebot.types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
     cancel_button = telebot.types.KeyboardButton("Отменить")
     markup.add(cancel_button)
-    bot.send_message(message.chat.id, "Вы можете отменить действие в любой момент, нажав кнопку Отменить.", reply_markup=markup)
+    bot.send_message(message.chat.id, "Вы можете отменить действие", reply_markup=markup)
 
 @bot.message_handler(func=lambda message: message.text == "Отменить")
 def cancel_action(message):
@@ -238,10 +208,10 @@ def calculate_fuel(message, start_km, end_km):
         session.commit()
         session.close()
 
-        bot.send_message(message.chat.id, f"Пройденное расстояние: {distance:.2f} км\n"
-                                          f"Груз: {cargo_weight_kg / 1000:.2f} тонн\n"
-                                          f"Примерный расход топлива: {total_fuel:.2f} литров.\n"
-                                          f"Данные сохранены.")
+        bot.send_message(message.chat.id, f"🚗 Пройденное расстояние: {distance:.2f} км\n"
+                                          f"📦 Груз: {cargo_weight_kg / 1000:.2f} тонн\n"
+                                          f"⛽ Примерный расход топлива: {total_fuel:.2f} литров.\n"
+                                          f"✅ Данные сохранены.")
         show_main_menu(message)
     except ValueError:
         bot.send_message(message.chat.id, "❌ Введи число! Попробуй ещё раз.")
@@ -344,8 +314,4 @@ def save_new_user_settings(message, base_fuel_consumption):
         logging.error(f"Error in save_new_user_settings: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
 
-# Запускаем бота в отдельном потоке
-    Thread(target=run_bot).start()
-
-    # Запускаем Gunicorn/Flask
-    app.run(host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+bot.polling(none_stop=True)
