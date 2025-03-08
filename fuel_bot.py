@@ -329,7 +329,7 @@ def save_new_user_settings(message, base_fuel_consumption):
 def keep_alive():
     while True:
         try:
-            requests.get("https://bobot-54x0.onrender.com/")
+            requests.get("https://bobot-7ms5.onrender.com")
         except Exception as e:
             print(f"Ошибка пинга: {e}")
         time.sleep(200)  # Каждые 3 минут
