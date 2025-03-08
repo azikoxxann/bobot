@@ -338,14 +338,6 @@ def keep_alive():
 # Запускаем пинг в отдельном потоке, чтобы не блокировать бота
 threading.Thread(target=keep_alive, daemon=True).start()
 
-# Команда /ping для ручной проверки
-@bot.message_handler(commands=["ping"])
-def ping_command(message):
-    bot.send_message(message.chat.id, "🏓 Я на связи!")
-
-# Запускаем пинг в отдельном потоке
-threading.Thread(target=keep_alive, daemon=True).start()
-
 # Запускаем веб-сервер в отдельном потоке
 def run_fastapi():
     uvicorn.run(app, host="0.0.0.0", port=8000)
