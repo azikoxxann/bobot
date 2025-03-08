@@ -5,3 +5,4 @@ telebot
 pyTelegramBotAPI
 flask
 gunicorn
+uvicorn
