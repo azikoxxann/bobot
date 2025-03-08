@@ -14,7 +14,6 @@ from fastapi import FastAPI
 load_dotenv()
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-requests.get(f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-1")
 CHAT_ID = 1087235453  # Ваш Telegram ID
 bot = telebot.TeleBot(TOKEN)
 
@@ -353,7 +352,14 @@ def run_fastapi():
 
 threading.Thread(target=run_fastapi, daemon=True).start()
 
+# Удаляем Webhook (если был)
 bot.remove_webhook()
 
-# Запускаем бота (polling)
+# Очистка зависших обновлений
+requests.get(f"https://api.telegram.org/bot{TOKEN}/getUpdates?offset=-1")
+
+# Ждём 5 секунд перед запуском
+time.sleep(5)
+
+# Запускаем бота
 bot.polling(none_stop=True)
