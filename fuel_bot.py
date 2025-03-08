@@ -8,6 +8,7 @@ from datetime import datetime
 import threading
 import time
 import uvicorn
+import requests
 from fastapi import FastAPI
 
 load_dotenv()
