@@ -5,12 +5,22 @@ from sqlalchemy import create_engine, Column, Integer, String, Float, Date, BigI
 from sqlalchemy.orm import sessionmaker, declarative_base
 import logging
 from datetime import datetime
+import threading
+import time
+import uvicorn
+from fastapi import FastAPI
 
 load_dotenv()
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
 CHAT_ID = 1087235453  # Ваш Telegram ID
 bot = telebot.TeleBot(TOKEN)
+
+app = FastAPI()
+
+@app.get("/")
+def home():
+    return {"status": "Бот работает!"}
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
                     format='%(asctime)s - %(levelname)s - %(message)s')
@@ -332,5 +342,14 @@ threading.Thread(target=keep_alive, daemon=True).start()
 def ping_command(message):
     bot.send_message(message.chat.id, "🏓 Я на связи!")
 
-# Бот начинает слушать сообщения
+# Запускаем пинг в отдельном потоке
+threading.Thread(target=keep_alive, daemon=True).start()
+
+# Запускаем веб-сервер в отдельном потоке
+def run_fastapi():
+    uvicorn.run(app, host="0.0.0.0", port=8000)
+
+threading.Thread(target=run_fastapi, daemon=True).start()
+
+# Запускаем бота (polling)
 bot.polling(none_stop=True)
