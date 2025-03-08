@@ -9,7 +9,7 @@ from datetime import datetime
 load_dotenv()
 
 TOKEN = os.getenv("TELEGRAM_BOT_TOKEN")
-
+CHAT_ID = 1087235453  # Ваш Telegram ID
 bot = telebot.TeleBot(TOKEN)
 
 logging.basicConfig(filename='fuel_bot.log', level=logging.INFO,
@@ -314,4 +314,23 @@ def save_new_user_settings(message, base_fuel_consumption):
         logging.error(f"Error in save_new_user_settings: {e}", exc_info=True)
         bot.send_message(message.chat.id, "Произошла ошибка, попробуйте позже.")
 
+# Функция для отправки "пинга"
+def keep_alive():
+    while True:
+        try:
+            bot.send_message(CHAT_ID, "Проверка связи 🤖")
+            print("Пинг отправлен!")
+        except Exception as e:
+            print(f"Ошибка отправки пинга: {e}")
+        time.sleep(300)  # Отправлять раз в 5 минут (300 сек)
+
+# Запускаем пинг в отдельном потоке, чтобы не блокировать бота
+threading.Thread(target=keep_alive, daemon=True).start()
+
+# Команда /ping для ручной проверки
+@bot.message_handler(commands=["ping"])
+def ping_command(message):
+    bot.send_message(message.chat.id, "🏓 Я на связи!")
+
+# Бот начинает слушать сообщения
 bot.polling(none_stop=True)
