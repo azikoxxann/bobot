@@ -329,13 +329,11 @@ def save_new_user_settings(message, base_fuel_consumption):
 def keep_alive():
     while True:
         try:
-            bot.send_message(CHAT_ID, "Проверка связи 🤖")
-            print("Пинг отправлен!")
+            requests.get("https://bobot-54x0.onrender.com/")
         except Exception as e:
-            print(f"Ошибка отправки пинга: {e}")
-        time.sleep(45)  # Отправлять раз в 45 сек
-
-# Запускаем пинг в отдельном потоке, чтобы не блокировать бота
+            print(f"Ошибка пинга: {e}")
+        time.sleep(200)  # Каждые 3 минут
+        
 threading.Thread(target=keep_alive, daemon=True).start()
 
 # Запускаем веб-сервер в отдельном потоке
