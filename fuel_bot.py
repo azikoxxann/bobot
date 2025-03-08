@@ -332,7 +332,7 @@ def keep_alive():
             print("Пинг отправлен!")
         except Exception as e:
             print(f"Ошибка отправки пинга: {e}")
-        time.sleep(300)  # Отправлять раз в 5 минут (300 сек)
+        time.sleep(45)  # Отправлять раз в 45 сек
 
 # Запускаем пинг в отдельном потоке, чтобы не блокировать бота
 threading.Thread(target=keep_alive, daemon=True).start()
